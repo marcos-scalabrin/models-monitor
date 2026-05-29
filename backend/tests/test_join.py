@@ -118,6 +118,25 @@ def test_medium_is_kept_as_identity():
     assert small.evaluations.intelligence is None
 
 
+def test_tier_marker_prevents_base_binding_to_pro_variant():
+    # Real case: AA has BOTH "MiMo-V2.5" (intel 49) and "MiMo-V2.5-Pro"
+    # (intel 53.8). OR has both `mimo-v2.5` and `mimo-v2.5-pro`. The base
+    # one must NOT inherit Pro's benchmarks just because Pro scores higher.
+    or_models = [
+        _or("xiaomi/mimo-v2.5", "MiMo-V2.5", "xiaomi"),
+        _or("xiaomi/mimo-v2.5-pro", "MiMo-V2.5-Pro", "xiaomi"),
+    ]
+    aa_models = [
+        _aa("mimo-v2-5-0424", "MiMo-V2.5", "xiaomi", intel=49.0),
+        _aa("mimo-v2-5-pro", "MiMo-V2.5-Pro", "xiaomi", intel=53.8),
+    ]
+    result = join(or_models, aa_models)
+    base = next(m for m in result.models if m.id == "xiaomi/mimo-v2.5")
+    pro = next(m for m in result.models if m.id == "xiaomi/mimo-v2.5-pro")
+    assert base.evaluations.intelligence == 49.0, "base wrongly bound to Pro"
+    assert pro.evaluations.intelligence == 53.8
+
+
 def test_no_duplicate_ids_when_aa_variant_collides_with_openrouter():
     # OR deepseek-v4-flash matches the "(Reasoning)" AA variant; the unmatched
     # "(Non-reasoning)" variant has slug deepseek-v4-flash and would synthesize

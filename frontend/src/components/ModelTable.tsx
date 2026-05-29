@@ -23,10 +23,14 @@ export function ModelTable({
   models,
   onSelect,
   selectedId,
+  compareIds,
+  onToggleCompare,
 }: {
   models: ScoredModel[];
   onSelect: (m: ScoredModel) => void;
   selectedId?: string;
+  compareIds: string[];
+  onToggleCompare: (id: string) => void;
 }) {
   const [sortKey, setSortKey] = useState<SortKey>("value_ratio");
   const [asc, setAsc] = useState(false);
@@ -99,6 +103,9 @@ export function ModelTable({
           <thead className="sticky top-0 z-10 bg-surface/95 backdrop-blur">
             <tr className="text-left text-xs uppercase tracking-wide text-muted">
               <th className="py-2.5 pl-4 pr-2 font-medium">Tier</th>
+              <th className="py-2.5 px-2 text-center font-medium" title="Adicionar à comparação">
+                Comp.
+              </th>
               {SORTABLE.map((c) => (
                 <th
                   key={c.key}
@@ -120,6 +127,18 @@ export function ModelTable({
                 className={`cursor-pointer border-t border-border/60 transition hover:bg-surface-2/60 ${selectedId === m.id ? "bg-accent/10" : ""}`}
               >
                 <td className="py-2 pl-4 pr-2"><TierBadge tier={m.tier} /></td>
+                <td
+                  className="py-2 px-2 text-center"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <input
+                    type="checkbox"
+                    checked={compareIds.includes(m.id)}
+                    onChange={() => onToggleCompare(m.id)}
+                    className="h-4 w-4 cursor-pointer accent-[var(--color-accent)]"
+                    aria-label={`Comparar ${m.name}`}
+                  />
+                </td>
                 <td className="py-2 px-2">
                   <div className="font-mono text-text">{m.id}</div>
                   <div className="text-xs text-muted">{m.creator}</div>

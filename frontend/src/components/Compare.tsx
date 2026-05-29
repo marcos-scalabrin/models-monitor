@@ -1,5 +1,5 @@
-import { Fragment } from "react";
-import type { ScoredModel } from "../types";
+import { Fragment, useMemo } from "react";
+import type { ProfileInfo, ScoredModel } from "../types";
 import { fmtContext, fmtDate, fmtPct, fmtScore, fmtUSD } from "../lib";
 import { TierBadge } from "./TierBadge";
 
@@ -11,9 +11,10 @@ interface Attr {
   get: (m: ScoredModel) => number | string | boolean | null;
   fmt?: (v: any) => string;
   dir: Dir;
+  highlight?: boolean;  // accents the row label (e.g. for the current profile)
 }
 
-const SECTIONS: { title: string; rows: Attr[] }[] = [
+const SECTIONS_BEFORE_PROFILE_COSTS: { title: string; rows: Attr[] }[] = [
   {
     title: "Resumo",
     rows: [
@@ -67,6 +68,9 @@ const SECTIONS: { title: string; rows: Attr[] }[] = [
       { label: "Blended (3:1) $/1M", get: (m) => m.pricing.blended_1m, fmt: fmtUSD, dir: "min" },
     ],
   },
+];
+
+const SECTIONS_AFTER_PROFILE_COSTS: { title: string; rows: Attr[] }[] = [
   {
     title: "Capacidades",
     rows: [
@@ -127,15 +131,39 @@ function Cell({ raw, attr, all }: { raw: any; attr: Attr; all: any[] }) {
 
 export function Compare({
   models,
+  profiles,
+  currentProfile,
   onRemove,
   onClose,
   onClear,
 }: {
   models: ScoredModel[];
+  profiles: ProfileInfo[];
+  currentProfile: string;
   onRemove: (id: string) => void;
   onClose: () => void;
   onClear: () => void;
 }) {
+  const sections = useMemo(() => {
+    const profileCostsRows: Attr[] = profiles.map((pf) => ({
+      label: pf.label,
+      hint: `${pf.cost_pattern} — ${pf.description}`,
+      get: (m) => m.costs_by_profile?.[pf.key] ?? null,
+      fmt: fmtUSD,
+      dir: "min" as Dir,
+      highlight: pf.key === currentProfile,
+    }));
+    const profileCostsSection = {
+      title: "Custo por perfil de agente ($/1M)",
+      rows: profileCostsRows,
+    };
+    return [
+      ...SECTIONS_BEFORE_PROFILE_COSTS,
+      profileCostsSection,
+      ...SECTIONS_AFTER_PROFILE_COSTS,
+    ];
+  }, [profiles, currentProfile]);
+
   if (models.length === 0) return null;
 
   return (
@@ -192,7 +220,7 @@ export function Compare({
               </tr>
             </thead>
             <tbody>
-              {SECTIONS.map((sec) => (
+              {sections.map((sec) => (
                 <Fragment key={sec.title}>
                   <tr>
                     <td
@@ -205,11 +233,16 @@ export function Compare({
                   {sec.rows.map((attr) => {
                     const vals = models.map((m) => attr.get(m));
                     return (
-                      <tr key={`${sec.title}-${attr.label}`}>
+                      <tr key={`${sec.title}-${attr.label}`} className={attr.highlight ? "bg-accent/5" : ""}>
                         <td
-                          className="sticky left-0 z-[1] whitespace-nowrap border-b border-border/40 bg-surface px-4 py-2 text-left text-xs text-muted"
+                          className={`sticky left-0 z-[1] whitespace-nowrap border-b border-border/40 px-4 py-2 text-left text-xs ${
+                            attr.highlight
+                              ? "bg-accent/10 font-medium text-accent-soft"
+                              : "bg-surface text-muted"
+                          }`}
                           title={attr.hint}
                         >
+                          {attr.highlight && <span className="mr-1">●</span>}
                           {attr.label}
                         </td>
                         {vals.map((v, i) => (

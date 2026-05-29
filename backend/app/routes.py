@@ -122,9 +122,20 @@ async def recommend(
     profile: str = Query(DEFAULT_PROFILE),
     top: int = Query(3, ge=1, le=10, description="number of fallbacks to include"),
     alpha: float = Query(DEFAULT_ALPHA, ge=0, le=2),
+    min_intelligence: float = Query(
+        48.0, ge=0, le=100,
+        description="Capability floor — both primary and fallbacks must have "
+        "Intelligence Index >= this value. Default 48 keeps weak models out.",
+    ),
 ) -> Recommendation:
     """Core agent-facing endpoint: best primary model + ranked fallbacks."""
     items = await _scored_for(profile, alpha)
+    # Capability floor: every recommended model must clear the bar. The caller
+    # (the agent) is responsible for picking a sensible floor for its task.
+    items = [
+        m for m in items
+        if (m.evaluations.intelligence or -1) >= min_intelligence
+    ]
     ranked = [m for m in _sort(items, "value_ratio") if m.value_ratio is not None]
     if not ranked:
         return Recommendation(profile=profile)

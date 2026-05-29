@@ -1,13 +1,20 @@
 # Hermes Model Router — Models Monitor
 
+[![CI](https://github.com/marcos-scalabrin/models-monitor/actions/workflows/ci.yml/badge.svg)](https://github.com/marcos-scalabrin/models-monitor/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
+[![Python 3.13+](https://img.shields.io/badge/python-3.13+-3776ab.svg)](https://www.python.org)
+[![Node 22](https://img.shields.io/badge/node-22-339933.svg)](https://nodejs.org)
+[![stack](https://img.shields.io/badge/stack-FastAPI%20%2B%20React-8b5cf6.svg)](#arquitetura)
+
 Mapa de **custo × performance** de LLMs para ajudar agentes a escolher o modelo
 certo para cada tarefa. Cruza benchmarks da **Artificial Analysis** com preços
 reais do **OpenRouter**, classifica os modelos em tiers por perfil de agente e
 expõe tudo via API (para agentes) e um dashboard (para humanos).
 
-> Especificação conceitual completa em [`hermes-model-router.md`](./hermes-model-router.md).
+![dashboard](docs/screenshot.png)
 
-![dashboard](https://img.shields.io/badge/stack-FastAPI%20%2B%20React-8b5cf6)
+> Especificação conceitual completa em [`hermes-model-router.md`](./hermes-model-router.md).
+> Itens em aberto em [`BACKLOG.md`](./BACKLOG.md).
 
 ## O que faz
 
@@ -78,11 +85,17 @@ npm run dev                   # http://localhost:5173 (proxy /api -> :8890)
 | `GET` | `/api/tiers?profile=…` | Modelos agrupados por tier |
 | `GET` | `/api/cost-map?profile=…` | Pontos prontos para plotar (benchmark + custo) |
 | `GET` | `/api/profiles` | Perfis de agente disponíveis |
-| `GET` | `/api/meta` | Status: total/casados, modo (live/fixtures), última atualização |
+| `GET` | `/api/meta` | Status: total/matched, modo (live/fixtures), última atualização |
 | `POST` | `/api/refresh` | Força re-fetch das fontes |
 
 Parâmetros comuns: `profile` (perfil de agente), `alpha` (sensibilidade ao
 custo: `0` ignora custo, `0.5` raiz quadrada (default), `1` linear).
+
+Em `/recommend`, há um piso de capacidade `min_intelligence` (default **48**):
+todos os modelos retornados — primário e fallbacks — precisam ter Intelligence
+Index acima desse valor. O agente passa o piso adequado pra tarefa (`48` filtra
+os fracos; `60` exige frontier). Sem isso o ranking puro de `value_ratio` pode
+indicar modelo baratíssimo mas incapaz como primário.
 
 Exemplo:
 
@@ -120,7 +133,7 @@ cd backend && uv run pytest
 ```
 
 Cobrem o join (matching, aliases de creator, dedup de variantes, modelos
-não-casados) e o scoring (value_ratio, atribuição de tiers, efeito de α).
+não-matched) e o scoring (value_ratio, atribuição de tiers, efeito de α).
 
 ## Roadmap
 

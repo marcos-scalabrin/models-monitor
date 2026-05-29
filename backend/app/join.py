@@ -50,6 +50,21 @@ _NOISE = {
 }
 
 
+# Product-tier suffixes. These are IDENTITY (not noise/effort), so a match
+# is only valid when both sides carry the same set — otherwise "mimo-v2.5"
+# would wrongly bind to "mimo-v2.5-pro". Note: deliberately omits ambiguous
+# words like "max"/"medium"/"high"/"low" which already serve dual purposes
+# elsewhere (Qwen Max, Mistral Medium, reasoning-effort labels).
+_TIER_MARKERS = frozenset({
+    "pro", "mini", "nano", "flash", "ultra", "turbo", "lite",
+    "plus", "base", "micro", "scout", "maverick",
+})
+
+
+def _tier_markers(tokens: frozenset[str]) -> frozenset[str]:
+    return tokens & _TIER_MARKERS
+
+
 def _is_date_token(t: str) -> bool:
     """Date-ish numeric suffixes (20260101, 2603, 2512) — not model identity."""
     if not t.isdigit():
@@ -154,11 +169,16 @@ def _best_aa_match(
         or_model.id.split("/", 1)[-1],
         or_model.canonical_slug,
     )
+    or_markers = _tier_markers(or_tokens)
     best: AAModel | None = None
     best_score = 0.0
     for entry in aa_index:
         # require creator agreement (cheap, high-precision gate)
         if entry.creator and or_creator and entry.creator != or_creator:
+            continue
+        # require the same product-tier markers on both sides — otherwise a
+        # base model would wrongly bind to its "-pro"/"-mini"/etc. variant.
+        if _tier_markers(entry.tokens) != or_markers:
             continue
         score = _similarity(or_tokens, entry.tokens)
         if score > best_score:

@@ -174,7 +174,13 @@ export default function App() {
         </div>
 
         <div className="col-span-12 min-h-[420px]">
-          <ModelTable models={filtered} onSelect={setSelected} selectedId={selected?.id} />
+          <ModelTable
+            models={filtered}
+            onSelect={setSelected}
+            selectedId={selected?.id}
+            compareIds={compareIds}
+            onToggleCompare={toggleCompare}
+          />
         </div>
       </main>
 
@@ -199,6 +205,8 @@ export default function App() {
       {compareOpen && (
         <Compare
           models={compareModels}
+          profiles={profiles}
+          currentProfile={profile}
           onRemove={toggleCompare}
           onClose={() => setCompareOpen(false)}
           onClear={() => {

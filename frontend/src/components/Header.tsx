@@ -75,7 +75,7 @@ export function Header({
               {live ? "live" : "fixtures"}
             </span>
             <span>
-              <b className="text-text">{meta.matched_models}</b>/{meta.total_models} casados
+              <b className="text-text">{meta.matched_models}</b>/{meta.total_models} matched
             </span>
             <span title="Artificial Analysis disponível">
               AA {meta.aa_available ? "✓" : "✗"}
