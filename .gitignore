@@ -18,3 +18,6 @@ dist/
 
 # Local data exports
 *.xlsx
+
+# service.sh runtime (PIDs + logs)
+.run/

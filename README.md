@@ -53,6 +53,19 @@ ocultar tier F) que afeta o mapa e a tabela. Backend serve na porta **8890**.
 
 ## Como rodar
 
+### Atalho — script de serviço
+
+```bash
+./service.sh start     # sobe backend (:8890) + frontend (:5173) em background
+./service.sh status    # mostra quem está vivo
+./service.sh logs      # tail -f no log do backend (logs frontend → ./service.sh logs frontend)
+./service.sh restart   # stop + start
+./service.sh stop      # derruba ambos
+```
+
+PIDs e logs ficam em `.run/` (gitignored). Variáveis opcionais: `BACKEND_PORT`,
+`FRONTEND_PORT`, `USE_FIXTURES=true` (offline). Ou rode manual:
+
 ### Backend
 
 ```bash
