@@ -39,6 +39,26 @@ port_busy() {
   fi
 }
 
+wait_http() {
+  local url="$1" max="${2:-20}"
+  for _ in $(seq 1 "$max"); do
+    if curl -sf -o /dev/null --max-time 1 "$url"; then return 0; fi
+    sleep 0.5
+  done
+  return 1
+}
+
+open_in_browser() {
+  local url="$1"
+  if command -v xdg-open >/dev/null 2>&1; then
+    (xdg-open "$url" >/dev/null 2>&1 &)
+  elif command -v open >/dev/null 2>&1; then
+    (open "$url" >/dev/null 2>&1 &)
+  else
+    return 1
+  fi
+}
+
 # --- start / stop ----------------------------------------------------------
 
 start_backend() {
@@ -127,8 +147,19 @@ case "${1:-status}" in
   start)
     start_backend
     start_frontend
+    url="http://localhost:$FRONTEND_PORT"
     echo
-    echo "abra → http://localhost:$FRONTEND_PORT"
+    if wait_http "http://127.0.0.1:$FRONTEND_PORT/" 20; then
+      if [[ "${NO_BROWSER:-}" == "1" ]]; then
+        echo "abra → $url"
+      elif open_in_browser "$url"; then
+        echo "abrindo no navegador → $url"
+      else
+        echo "abra → $url  (nenhum xdg-open/open disponível)"
+      fi
+    else
+      echo "abra → $url  (frontend ainda subindo)"
+    fi
     ;;
   stop)
     stop_one "$FRONTEND_PID" frontend
