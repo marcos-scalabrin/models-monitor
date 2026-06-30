@@ -166,9 +166,9 @@ case "${1:-status}" in
     stop_one "$BACKEND_PID" backend
     ;;
   restart)
-    "$0" stop
+    bash "${BASH_SOURCE[0]}" stop
     sleep 1
-    "$0" start
+    bash "${BASH_SOURCE[0]}" start
     ;;
   status)
     status_one "$BACKEND_PID"  backend  "$BACKEND_PORT"
