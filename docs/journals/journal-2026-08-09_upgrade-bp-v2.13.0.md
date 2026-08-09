@@ -51,3 +51,19 @@ do dono, pois é uma ação externa e pode transportar dados desconhecidos.
 - MODELS-12 deve identificar dono/origem da planilha e encerrar o desvio com
   regeneração comprovada ou espelho e restore real datado.
 - A próxima seção registrará o SHA imutável e o veredito independente.
+
+## Revisão independente — rodada 1
+
+**Veredito: insatisfatório para `7bab43818276db8d860da20f3887536a6d032e13`.**
+O checador confirmou que o alvo permaneceu imutável e que o delta não tocou
+produto, API, portas ou infraestrutura. Contudo, encontrou que
+`9e2ba10ec8002e9c6ad1ee96d61ae8dba99377de` é o objeto de tag anotada
+`v2.13.0`, enquanto o commit da release é
+`8a8d704bb80f95aa742f4b9dcd6ec18a33b10a05`. A orientação de adoção exige o
+SHA do commit correspondente; corrigir o lock e os entrypoints é necessário.
+
+O `make check` do checador não chegou ao fim porque a worktree isolada não
+tinha `frontend/node_modules` (`eslint: not found`). Isso não contradiz o gate
+verde já executado no checkout preparado, mas a nova rodada usará as
+dependências já existentes ou as instalará na árvore do checador antes de
+concluir. O comentário completo, prompt e saídas estão no Plane em MODELS-11.

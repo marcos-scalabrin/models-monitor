@@ -3,7 +3,7 @@
 bp:
   repository: "git@github.com:marcos-scalabrin/bp-best-practices.git"
   version: "v2.13.0"
-  commit: "9e2ba10ec8002e9c6ad1ee96d61ae8dba99377de"
+  commit: "8a8d704bb80f95aa742f4b9dcd6ec18a33b10a05"
   adopted_at: "2026-08-09"
 
 profiles:

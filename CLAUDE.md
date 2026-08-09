@@ -1,7 +1,7 @@
 # Instruções para Claude Code
 
-Este projeto adota `bp-best-practices` **v2.13.0**, fixada no commit
-`9e2ba10ec8002e9c6ad1ee96d61ae8dba99377de`. Leia
+Este projeto adota `bp-best-practices` **v2.13.0**, fixada no commit de release
+`8a8d704bb80f95aa742f4b9dcd6ec18a33b10a05`. Leia
 [`bp-lock.yaml`](bp-lock.yaml), [`AGENTS.md`](AGENTS.md), o
 [README](README.md), o [TestPlan](docs/testplans/testplan-service.md) e os
 documentos relevantes antes de editar. As instruções locais e desvios

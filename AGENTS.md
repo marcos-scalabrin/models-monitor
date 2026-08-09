@@ -2,8 +2,8 @@
 
 ## Baseline e contexto
 
-Este projeto adota `bp-best-practices` **v2.13.0**, fixada no commit
-`9e2ba10ec8002e9c6ad1ee96d61ae8dba99377de`; a proveniência, os perfis ativos e
+Este projeto adota `bp-best-practices` **v2.13.0**, fixada no commit de release
+`8a8d704bb80f95aa742f4b9dcd6ec18a33b10a05`; a proveniência, os perfis ativos e
 o desvio temporário de retenção de dados locais estão em
 [`bp-lock.yaml`](bp-lock.yaml). Antes de editar, leia este arquivo,
 o [README](README.md), o [TestPlan](docs/testplans/testplan-service.md) e os
