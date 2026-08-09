@@ -26,6 +26,7 @@ usam fixtures sintéticas e `USE_FIXTURES=true`.
 | S-06 | Falha de warm-up é observável sem vazar texto sensível | Unit (pytest) | `backend/tests/test_main.py` |
 | S-07 | Tabela vazia distingue filtro de falha de carga e oferece recuperação | Build + ensaio manual | lint/build e Journal de 2026-08-09 |
 | S-08 | Zoom do mapa altera domínio e Reset o restaura | Ensaio headless | Journal de 2026-08-09: botão, `Ctrl/⌘ + roda` e Reset |
+| S-09 | Busca por nome ou ID filtra simultaneamente tabela e mapa | Ensaio headless | Journal MODELS-14: busca exata reduz ambos para o mesmo modelo |
 
 ## Gate local e CI
 

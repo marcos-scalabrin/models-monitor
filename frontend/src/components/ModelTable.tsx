@@ -39,15 +39,10 @@ export function ModelTable({
   const [sortKey, setSortKey] = useState<SortKey>("value_ratio");
   const [asc, setAsc] = useState(false);
   const [tierFilter, setTierFilter] = useState<Tier | "all">("all");
-  const [query, setQuery] = useState("");
 
   const rows = useMemo(() => {
     let r = models;
     if (tierFilter !== "all") r = r.filter((m) => m.tier === tierFilter);
-    if (query) {
-      const q = query.toLowerCase();
-      r = r.filter((m) => m.id.toLowerCase().includes(q) || m.name.toLowerCase().includes(q));
-    }
     const sorted = [...r].sort((a, b) => {
       const va = getVal(a, sortKey);
       const vb = getVal(b, sortKey);
@@ -59,7 +54,7 @@ export function ModelTable({
       return 0;
     });
     return sorted;
-  }, [models, tierFilter, query, sortKey, asc]);
+  }, [models, tierFilter, sortKey, asc]);
 
   function toggleSort(key: SortKey) {
     if (key === sortKey) setAsc((a) => !a);
@@ -71,7 +66,6 @@ export function ModelTable({
 
   function clearAllFilters() {
     setTierFilter("all");
-    setQuery("");
     onClearFilters();
   }
 
@@ -99,12 +93,6 @@ export function ModelTable({
               </button>
             ))}
           </div>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Buscar modelo…"
-            className="w-44 rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm text-text outline-none placeholder:text-muted focus:border-accent/60"
-          />
         </div>
       </div>
 

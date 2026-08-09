@@ -2,6 +2,7 @@ import { DEFAULT_FILTERS, type Filters } from "../filters";
 
 function isDefault(f: Filters): boolean {
   return (
+    f.query === "" &&
     f.minIntelligence === 0 &&
     f.creators.length === 0 &&
     !f.onlyBenchmarked &&
@@ -88,6 +89,16 @@ export function FilterBar({
   return (
     <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-border bg-surface/30 px-6 py-2.5 text-sm">
       <span className="text-xs font-semibold uppercase tracking-wider text-muted">Filtros</span>
+
+      <label className="flex items-center gap-2">
+        <span className="text-xs text-muted">Buscar</span>
+        <input
+          value={filters.query}
+          onChange={(e) => set({ query: e.target.value })}
+          placeholder="Nome ou ID…"
+          className="w-44 rounded-md border border-border bg-surface-2 px-2 py-1 text-xs text-text outline-none placeholder:text-muted focus:border-accent/60"
+        />
+      </label>
 
       <label className="flex items-center gap-2">
         <span className="text-xs text-muted">Intelligence ≥</span>

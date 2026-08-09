@@ -37,9 +37,10 @@ backend/   FastAPI — fetch → join → score → tiers → API (uv)
 frontend/  React + Vite + TS + Tailwind v4 + Recharts (dark dashboard)
 ```
 
-Dashboard: mapa custo×performance, tabela ordenável (clique nos cabeçalhos),
-busca, e barra de filtros (Intelligence ≥ X, provider, só-com-benchmark,
-ocultar tier F) que afeta o mapa e a tabela. Backend serve na porta **8890**.
+Dashboard: mapa custo×performance e tabela ordenável (clique nos cabeçalhos),
+com busca compartilhada por nome ou ID e barra de filtros (Intelligence ≥ X,
+provider, só-com-benchmark, ocultar tier F) que afetam ambos. Backend serve na
+porta **8890**.
 
 | Camada | Arquivo |
 |---|---|

@@ -121,6 +121,9 @@ export default function App() {
   const filtered = useMemo(
     () =>
       models.filter((m) => {
+        const query = filters.query.trim().toLowerCase();
+        if (query && !m.id.toLowerCase().includes(query) && !m.name.toLowerCase().includes(query))
+          return false;
         if (filters.onlyBenchmarked && m.benchmark_score == null) return false;
         if (filters.hideFiltered && m.tier === "F") return false;
         if (filters.minIntelligence > 0 && (m.evaluations.intelligence ?? -1) < filters.minIntelligence)
