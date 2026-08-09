@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Data | 2026-08-09 |
-| Status | Em andamento |
+| Status | Encerramento local concluído — aguarda autorização de push |
 | Baseline de abertura | `bp-best-practices` v2.7.0, commit `125a1c459a8e30fefdf8151a167c870f8f3954ca` |
 | Work item | Plane INFRA / MODELS, `MODELS-11` — Ops: atualizar baseline BP para v2.13.0 |
 
@@ -88,3 +88,23 @@ veredito estão no comentário da rodada 2 em MODELS-11.
 O upgrade está validado localmente. Os commits locais ainda aguardam autorização
 explícita para `git push origin main`; até então o work item não será movido
 para `Done`, pois o remoto não recebeu o estado validado.
+
+## Encerramento da sessão (§3.2)
+
+**Alcance do veredito.** O SHA
+`e958349ea978ba8056154bbc60f6906d60a0b78a` foi validado independentemente na
+rodada 3. Esta seção registra o encerramento depois dessa validação e será
+commitada como delta documental; não amplia o alvo já revisado.
+
+| Item | Veredito | Evidência | Justificativa (se não cumprido) |
+|---|---|---|---|
+| 1. Trabalho e validação | cumprido para `e958349` | MODELS-11 contém prompt pré-disparo e três rodadas; rodadas 2 e 3 satisfatórias para `dd76c53` e `e958349`; `make check` com scan OK, 21 testes, lint e build | — |
+| 2. Journal | cumprido | este Journal, aberto antes da edição e com plano, decisões, verificações, reprovação/correção e handoff | — |
+| 3. Commits e merge | cumprido localmente | `session-close` listou `7bab438`, `dd76c53`, `e958349`; `git status` limpo em `main`; não há branch de feature a mesclar | o commit deste registro é delta documental posterior ao SHA validado |
+| 4. Sincronização com remoto | pendente | `session-close`: `origin` configurado e 3 commits locais ainda não empurrados | push exige autorização explícita do dono; o item MODELS-11 permanece em execução até então |
+| 5. Worktrees | cumprido | `git worktree list --porcelain` mostrou apenas a worktree principal; as três árvores temporárias de checagem foram removidas | — |
+| 6. Processos e recursos | cumprido | `ss -ltnp '( sport = :5173 or sport = :8890 )'` sem listeners; inspeção manual de CWD mostrou somente a árvore de processos do Codex, não serviço Models Monitor | o script não verificou por índice ausente, compensado pela inspeção manual e pelas portas efetivas |
+| 7. Loop da baseline | cumprido | MODELS-11 registrou a correção de pin e seus vereditos; MODELS-12 rastreia o dado ignorado; nenhuma nova lacuna da baseline foi observada nesta sessão | — |
+
+O aviso de bundle Vite permanece em MODELS-10. Nenhum serviço do Models Monitor
+foi deixado escutando em `5173` ou `8890`.
