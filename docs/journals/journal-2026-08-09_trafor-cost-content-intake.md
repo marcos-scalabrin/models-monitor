@@ -49,6 +49,13 @@
 - **Alternativas consideradas:** faixas de economia ou cases anonimizados, descartados por não haver clientes/dados disponíveis; cenários sem fonte, descartados por reduzirem a credibilidade do material.
 - **Produzido:** comentário interno `14370507-ffb5-409f-a2f0-a13190e62a20` na MODELS-13.
 
+### D5 — Não criar issue de melhoria da baseline para um descumprimento pontual já coberto pela regra
+
+- **Decidido:** registrar como pendência deste encerramento a abertura retrospectiva do Journal e o uso do checkout compartilhado; não criar uma nova issue no projeto BP.
+- **Por quê:** `core.md` §3.2 e §4.1 já descrevem explicitamente a abertura de Journal antes da edição e o uso de worktree. Não houve ambiguidade, defeito na ferramenta ou lacuna reutilizável da baseline a corrigir.
+- **Alternativas consideradas:** criar issue BP apenas para rastrear este evento, descartada porque duplicaria uma regra já clara sem produzir melhoria de processo; omitir o desvio, descartada porque reduziria a auditabilidade do encerramento.
+- **Produzido:** este Journal com os itens 2 e 5 declarados como pendentes.
+
 ## Rastreio operacional
 
 - Work item criado: `MODELS-13` (`39303e48-02b2-4feb-ba75-7f7be7c1fca8`), estado **Backlog**, prioridade **high**.
@@ -68,4 +75,22 @@
 
 ## Encerramento (§3.2)
 
-O relatório de encerramento será acrescentado após a coleta da evidência bruta por `session-close.sh`. O escopo não inclui uma entrega de produto ou conteúdo publicado: inclui a configuração local de ignore, a decisão editorial e a criação/atualização da MODELS-13.
+O escopo não inclui uma entrega de produto ou conteúdo publicado: inclui a configuração local de ignore, a decisão editorial e a criação/atualização da MODELS-13.
+
+De acordo com a BP v2.13.0, executei:
+
+| Item | Veredito | Evidência | Justificativa (se não cumprido) |
+|---|---|---|---|
+| 1. Trabalho e validação | não se aplica à entrega final | MODELS-13 permanece em Backlog; nenhum artigo, post ou one-pager foi produzido. Para o ajuste local, `git check-ignore` confirmou `in/` e `make check` passou (scan OK, 21 testes, lint e build). | Não houve work item entregue/`Done` que exigisse checagem independente. |
+| 2. Journal | pendente | Este arquivo, datado e com decisões, evidências e handoff; `core.md` §3.2/§4.1 lido nesta sessão. | O Journal foi aberto após a edição de `.gitignore`, em resposta ao pedido de fechamento; é retrospectivo. |
+| 3. Commits e merge | cumprido localmente para `24fa56b` | `git status --short --branch` após o commit: `## main...origin/main [ahead 1]`; `git log -1` identificou `24fa56b docs(journal): close Trafor content intake session`. | O apêndice desta tabela será um delta documental posterior ao SHA citado. |
+| 4. Sincronização com remoto | pendente | `session-close.sh --repo /home/mscalabrin/projects/models-monitor` encontrou `origin` e `commits locais ainda não empurrados em main: 1`. | Push não foi autorizado pelo dono. |
+| 5. Worktrees | pendente | `git worktree list --porcelain` mostrou somente `/home/mscalabrin/projects/models-monitor`; `session-close` informou que não há worktree registrada. | Esta sessão editou o checkout compartilhado e não abriu worktree dedicada; o desvio está declarado aqui. |
+| 6. Processos e recursos | cumprido para este projeto | `pgrep -af 'uvicorn|vite|service.sh|models-monitor'` retornou apenas o próprio comando de consulta; `ss -ltnp '( sport = :5173 or sport = :8890 )'` não mostrou listeners. | O relatório global listou processos/portas de outros projetos; não foram alterados. |
+| 7. Loop da baseline | cumprido | D5 registra a avaliação: os desvios já são cobertos de forma explícita por `core.md` §3.2 e §4.1; não foi identificado gap reutilizável para nova issue BP. | — |
+
+### Saídas relevantes
+
+- `make check` em 2026-08-09 → secret scan OK; `21 passed`; ESLint e TypeScript/Vite build OK; aviso não bloqueante de bundle acima de 500 kB.
+- `session-close.sh --repo /home/mscalabrin/projects/models-monitor` → Journal encontrado; árvore limpa em `main`; uma alteração local ainda não enviada; nenhuma worktree registrada.
+- Inspeção manual após o relatório → nenhum processo do Models Monitor e nenhuma escuta em `5173`/`8890`.
