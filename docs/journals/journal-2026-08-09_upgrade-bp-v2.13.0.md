@@ -67,3 +67,24 @@ tinha `frontend/node_modules` (`eslint: not found`). Isso não contradiz o gate
 verde já executado no checkout preparado, mas a nova rodada usará as
 dependências já existentes ou as instalará na árvore do checador antes de
 concluir. O comentário completo, prompt e saídas estão no Plane em MODELS-11.
+
+## Correção e revisão independente — rodada 2
+
+O commit corretivo `dd76c5343129c1bba079d22be0c1115e16e74394` substituiu o
+objeto de tag pelo commit de release `8a8d704bb80f95aa742f4b9dcd6ec18a33b10a05`
+no lock e nos dois entrypoints. A nova worktree de checagem, preparada com
+dependências Node locais sem alterar o alvo Git, reconfirmou o SHA no início e
+no fim e emitiu **veredito satisfatório**.
+
+Evidências da rodada 2: `make check` passou (scan de segredos OK; `21 passed`;
+ESLint e build Vite OK); `git diff --check` passou; a comparação
+`v2.13.0^{}` devolveu o mesmo SHA fixado. O aviso de bundle Vite de 571,04 kB
+permanece não bloqueante e é acompanhado por MODELS-10. O prompt, os comandos,
+as saídas, o modelo/papel (`GPT-5.6-terra`, checador independente) e o
+veredito estão no comentário da rodada 2 em MODELS-11.
+
+## Handoff
+
+O upgrade está validado localmente. Os commits locais ainda aguardam autorização
+explícita para `git push origin main`; até então o work item não será movido
+para `Done`, pois o remoto não recebeu o estado validado.
