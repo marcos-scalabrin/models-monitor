@@ -25,6 +25,8 @@ export function ModelTable({
   selectedId,
   compareIds,
   onToggleCompare,
+  tierFilter,
+  onTierFilter,
   onClearFilters,
   loadError,
 }: {
@@ -33,16 +35,16 @@ export function ModelTable({
   selectedId?: string;
   compareIds: string[];
   onToggleCompare: (id: string) => void;
+  tierFilter: Tier | "all";
+  onTierFilter: (tier: Tier | "all") => void;
   onClearFilters: () => void;
   loadError: boolean;
 }) {
   const [sortKey, setSortKey] = useState<SortKey>("value_ratio");
   const [asc, setAsc] = useState(false);
-  const [tierFilter, setTierFilter] = useState<Tier | "all">("all");
 
   const rows = useMemo(() => {
-    let r = models;
-    if (tierFilter !== "all") r = r.filter((m) => m.tier === tierFilter);
+    const r = models;
     const sorted = [...r].sort((a, b) => {
       const va = getVal(a, sortKey);
       const vb = getVal(b, sortKey);
@@ -54,7 +56,7 @@ export function ModelTable({
       return 0;
     });
     return sorted;
-  }, [models, tierFilter, sortKey, asc]);
+  }, [models, sortKey, asc]);
 
   function toggleSort(key: SortKey) {
     if (key === sortKey) setAsc((a) => !a);
@@ -64,10 +66,7 @@ export function ModelTable({
     }
   }
 
-  function clearAllFilters() {
-    setTierFilter("all");
-    onClearFilters();
-  }
+  const clearAllFilters = onClearFilters;
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface/70 backdrop-blur">
@@ -78,7 +77,7 @@ export function ModelTable({
         <div className="ml-auto flex items-center gap-2">
           <div className="flex gap-1 rounded-lg bg-surface-2 p-1">
             <button
-              onClick={() => setTierFilter("all")}
+              onClick={() => onTierFilter("all")}
               className={`rounded-md px-2 py-1 text-xs font-medium transition ${tierFilter === "all" ? "bg-accent/20 text-accent-soft" : "text-muted hover:text-text"}`}
             >
               Todos
@@ -86,7 +85,7 @@ export function ModelTable({
             {TIER_ORDER.map((t) => (
               <button
                 key={t}
-                onClick={() => setTierFilter(t)}
+                onClick={() => onTierFilter(t)}
                 className={`rounded-md px-2 py-1 text-xs font-bold transition ${tierFilter === t ? "bg-accent/20 text-accent-soft" : "text-muted hover:text-text"}`}
               >
                 {t}

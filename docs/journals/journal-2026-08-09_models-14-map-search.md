@@ -26,3 +26,19 @@
 - Não há sessão/agente concorrente neste checkout no início do trabalho;
   `git status --short` estava limpo e `git worktree list --porcelain` mostrou
   somente a árvore principal.
+
+## Iteração após checagem independente
+
+A primeira checagem independente do commit `321f9a6` foi **insatisfatória**:
+o tier permanecia local à tabela, de modo que a limpeza global não o resetava.
+Também ficou explícita a diferença estrutural entre a tabela (que mantém
+modelos sem métrica) e o mapa (que só pode plotar modelos com benchmark e
+custo).
+
+O ajuste seguinte promove o tier ao estado compartilhado e torna visível no
+título do mapa a contagem de pontos plotáveis, sem descartar linhas válidas da
+tabela. O ensaio headless live, sem refresh, confirmou:
+
+- busca exata por `inclusionai/ling-3.0-flash`: tabela `1` e mapa `1` ponto;
+- seleção de tier reduziu a tabela para `3` linhas;
+- `Limpar` restaurou a consulta vazia, `734` linhas e `616` pontos elegíveis.

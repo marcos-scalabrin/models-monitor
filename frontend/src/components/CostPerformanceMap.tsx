@@ -96,8 +96,9 @@ export function CostPerformanceMap({
 }) {
   // We transform cost to log10 ourselves and use a linear axis — Recharts'
   // built-in scale="log" mispositions scatter points (renders axis, drops dots).
-  const { byTier, xDomain, yDomain } = useMemo(() => {
+  const { byTier, pointCount, xDomain, yDomain } = useMemo(() => {
     const groups: Record<Tier, Point[]> = { S: [], A: [], B: [], C: [], F: [] };
+    let pointCount = 0;
     let min = Infinity;
     let max = -Infinity;
     for (const m of models) {
@@ -113,11 +114,13 @@ export function CostPerformanceMap({
         z: m.performance.output_tokens_per_second ?? 40,
         model: m,
       });
+      pointCount += 1;
     }
     const lo = Number.isFinite(min) ? Math.floor(min * 2) / 2 - 0.1 : -1;
     const hi = Number.isFinite(max) ? Math.ceil(max * 2) / 2 + 0.1 : 2;
     return {
       byTier: groups,
+      pointCount,
       xDomain: [lo, hi] as Domain,
       yDomain: [0, 100] as Domain,
     };
@@ -158,7 +161,7 @@ export function CostPerformanceMap({
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface/70 p-5 backdrop-blur">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
-          Mapa custo × performance
+          Mapa custo × performance <span className="text-text">({pointCount} pontos)</span>
         </h2>
         <div className="flex flex-wrap items-center gap-3 text-xs">
           {TIER_ORDER.filter((t) => t !== "F").map((t) => (

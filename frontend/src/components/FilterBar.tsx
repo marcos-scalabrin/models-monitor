@@ -3,6 +3,7 @@ import { DEFAULT_FILTERS, type Filters } from "../filters";
 function isDefault(f: Filters): boolean {
   return (
     f.query === "" &&
+    f.tier === "all" &&
     f.minIntelligence === 0 &&
     f.creators.length === 0 &&
     !f.onlyBenchmarked &&
