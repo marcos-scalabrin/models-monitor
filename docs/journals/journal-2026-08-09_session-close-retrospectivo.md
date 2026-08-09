@@ -75,3 +75,20 @@ do bundle Vite.
   caminho de adoção.
 - O relatório de encerramento, commit, push e resultado da revisão independente
   serão acrescidos abaixo antes do fechamento final.
+
+## Encerramento (§3.2)
+
+**Alcance do veredito.** O SHA `b37fb23` contém o delta de produto,
+documentação e rastreio, revisado independentemente e validado por `make check`.
+O apêndice desta seção é documental e será incluído em um commit posterior;
+ele não é usado como prova de si próprio.
+
+| Item | Veredito | Evidência | Justificativa (se não cumprido) |
+|---|---|---|---|
+| 1. Trabalho e validação | cumprido para `b37fb23` | revisão independente: satisfatório; `make check` com scan OK, 21 testes, lint e build; comentários de revisão nos itens Plane | — |
+| 2. Journal | cumprido | este arquivo, datado e explicitamente retrospectivo por autorização do dono | Não substitui o Journal de abertura; a limitação é rastreada na issue BP `82d571cb-e1d6-4b3f-bee8-6e8c6c7951d0` |
+| 3. Commits e merge | cumprido | `b37fb23` na branch compartilhada `main`; apêndice de encerramento commitado em seguida | — |
+| 4. Sincronização remota | cumprido | `git push origin main` e `git rev-list origin/main..main` após o push | — |
+| 5. Worktrees | não se aplica | `session-close`: nenhuma worktree registrada; não houve worktree a remover | O uso histórico do checkout compartilhado é desvio documentado e originou a issue BP |
+| 6. Processos e recursos | cumprido | `./service.sh stop`; `ss` confirmou `:5173` e `:8890` livres | A ferramenta não verificou família de worktrees sem índice, mas não havia worktree registrada e os únicos processos desta sessão foram encerrados por PID |
+| 7. Loop da baseline | cumprido | issue BP `82d571cb-e1d6-4b3f-bee8-6e8c6c7951d0`; aviso Vite rastreado em `3d027b7d-e2a7-4829-b0ee-db816393a2f2` | — |
