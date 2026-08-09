@@ -85,9 +85,8 @@ veredito estão no comentário da rodada 2 em MODELS-11.
 
 ## Handoff
 
-O upgrade está validado localmente. Os commits locais ainda aguardam autorização
-explícita para `git push origin main`; até então o work item não será movido
-para `Done`, pois o remoto não recebeu o estado validado.
+O upgrade está validado localmente. A sincronização aguardava autorização
+explícita para `git push origin main` antes da entrega remota.
 
 ## Encerramento da sessão (§3.2)
 
@@ -108,3 +107,10 @@ commitada como delta documental; não amplia o alvo já revisado.
 
 O aviso de bundle Vite permanece em MODELS-10. Nenhum serviço do Models Monitor
 foi deixado escutando em `5173` ou `8890`.
+
+## Sincronização autorizada
+
+Após autorização explícita do dono, `git push origin main` publicou os commits
+de `9285d01` até `978a66b`. A verificação imediata devolveu
+`## main...origin/main` e `git rev-list --count origin/main..main` = `0`.
+Este registro documental é enviado no push subsequente.
