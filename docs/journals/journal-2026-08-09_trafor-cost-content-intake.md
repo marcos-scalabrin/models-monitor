@@ -94,3 +94,22 @@ De acordo com a BP v2.13.0, executei:
 - `make check` em 2026-08-09 → secret scan OK; `21 passed`; ESLint e TypeScript/Vite build OK; aviso não bloqueante de bundle acima de 500 kB.
 - `session-close.sh --repo /home/mscalabrin/projects/models-monitor` → Journal encontrado; árvore limpa em `main`; uma alteração local ainda não enviada; nenhuma worktree registrada.
 - Inspeção manual após o relatório → nenhum processo do Models Monitor e nenhuma escuta em `5173`/`8890`.
+
+## Encerramento final após sincronização autorizada
+
+Após autorização explícita do dono, a sincronização de `main` foi executada e
+confirmada antes deste apêndice documental. O alcance de sincronização abaixo é
+o commit `cc37c1a`; este apêndice será enviado em um push subsequente, sem
+alterar o escopo de trabalho que a tabela descreve.
+
+De acordo com a BP v2.13.0, executei:
+
+| Item | Veredito | Evidência | Justificativa (se não cumprido) |
+|---|---|---|---|
+| 1. Trabalho e validação | não se aplica à entrega final | MODELS-13 permanece no Backlog; não há artigo, LinkedIn ou one-pager entregue. O ajuste local passou em `git check-ignore`, `git diff --check` e `make check` (scan OK, 21 testes, lint e build). | Nenhum work item chegou a `Done`; portanto não há entrega que peça checagem independente. |
+| 2. Journal | pendente | Este Journal contém plano reconstruído, decisões, verificações e handoff. | Foi aberto retrospectivamente, após a primeira edição de `.gitignore`. |
+| 3. Commits e merge | cumprido | `24fa56b` e `cc37c1a` estão em `main`; o segundo registra a evidência de fechamento. | Este apêndice é delta documental posterior aos commits citados. |
+| 4. Sincronização com remoto | cumprido para `cc37c1a` | `git push origin main` publicou `02d1ed0..cc37c1a`; em seguida, `git fetch origin main`, `git status --short --branch` mostrou `## main...origin/main` e `git rev-list --count origin/main..main` devolveu `0`. | Este apêndice será enviado em push subsequente. |
+| 5. Worktrees | pendente | `git worktree list --porcelain` mostrou apenas `/home/mscalabrin/projects/models-monitor`; `session-close` não encontrou worktree registrada. | A sessão editou o checkout compartilhado, sem worktree dedicada a remover. |
+| 6. Processos e recursos | cumprido para o projeto | `pgrep -af 'uvicorn|vite|service.sh|models-monitor'` retornou somente a própria consulta; `ss -ltnp '( sport = :5173 or sport = :8890 )'` não mostrou listeners. | Portas/processos de outros projetos foram preservados. |
+| 7. Loop da baseline | cumprido | D5 avalia que os desvios já são cobertos por `core.md` §3.2 e §4.1; não houve lacuna reutilizável que justificasse issue BP nova. | — |
