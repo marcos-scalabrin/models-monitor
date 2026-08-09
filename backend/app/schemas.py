@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 
@@ -109,11 +111,28 @@ class Recommendation(BaseModel):
     fallbacks: list[ScoredModel] = Field(default_factory=list)
 
 
+class SourceInfo(BaseModel):
+    """Provenance of one upstream dataset in the current cache."""
+
+    mode: Literal["live", "fixtures"]
+    # Cache-load timestamp, not the upstream provider's own data timestamp.
+    last_updated: str | None = None
+
+
+class SourceProvenance(BaseModel):
+    """The two datasets that form the scored model catalogue."""
+
+    openrouter: SourceInfo
+    artificial_analysis: SourceInfo
+
+
 class MetaInfo(BaseModel):
     total_models: int
     matched_models: int
     openrouter_only: int
     aa_only: int
     last_updated: str | None = None
-    source_mode: str  # "live" | "fixtures"
+    # Aggregate mode. "mixed" means the datasets below do not share an origin.
+    source_mode: Literal["live", "fixtures", "mixed"]
+    sources: SourceProvenance
     aa_available: bool

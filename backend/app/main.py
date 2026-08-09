@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -11,14 +12,21 @@ from .config import settings
 from .routes import router
 from .store import store
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # warm the cache on startup; ignore failures (routes will lazy-load)
+    # Warm the cache on startup. Routes can still lazily retry on failure.
     try:
         await store.refresh()
-    except Exception:
-        pass
+    except Exception as exc:
+        # Do not serialize the exception: provider responses can contain
+        # sensitive details. The type is enough to find and diagnose failures.
+        logger.warning(
+            "model-store warm-up failed (%s); routes will retry lazily",
+            type(exc).__name__,
+        )
     yield
 
 

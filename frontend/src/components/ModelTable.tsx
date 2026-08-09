@@ -25,12 +25,16 @@ export function ModelTable({
   selectedId,
   compareIds,
   onToggleCompare,
+  onClearFilters,
+  loadError,
 }: {
   models: ScoredModel[];
   onSelect: (m: ScoredModel) => void;
   selectedId?: string;
   compareIds: string[];
   onToggleCompare: (id: string) => void;
+  onClearFilters: () => void;
+  loadError: boolean;
 }) {
   const [sortKey, setSortKey] = useState<SortKey>("value_ratio");
   const [asc, setAsc] = useState(false);
@@ -63,6 +67,12 @@ export function ModelTable({
       setSortKey(key);
       setAsc(key === "name");
     }
+  }
+
+  function clearAllFilters() {
+    setTierFilter("all");
+    setQuery("");
+    onClearFilters();
   }
 
   return (
@@ -120,7 +130,35 @@ export function ModelTable({
             </tr>
           </thead>
           <tbody>
-            {rows.map((m) => (
+            {rows.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-4 py-12 text-center">
+                  <div
+                    role={loadError ? "alert" : "status"}
+                    className="mx-auto flex max-w-md flex-col items-center gap-3"
+                  >
+                    <p className="font-medium text-text">
+                      {loadError
+                        ? "Não foi possível carregar os modelos."
+                        : "Nenhum modelo corresponde aos filtros atuais."}
+                    </p>
+                    <p className="text-sm text-muted">
+                      {loadError
+                        ? "Confira o aviso de erro acima e tente atualizar novamente."
+                        : "Limpe os filtros para voltar à lista completa."}
+                    </p>
+                    {!loadError && (
+                      <button
+                        onClick={clearAllFilters}
+                        className="rounded-lg border border-border bg-surface-2 px-3 py-1.5 text-sm font-medium text-text transition hover:border-accent/60"
+                      >
+                        Limpar filtros
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ) : rows.map((m) => (
               <tr
                 key={m.id}
                 onClick={() => onSelect(m)}

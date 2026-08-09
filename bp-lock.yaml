@@ -1,0 +1,26 @@
+# Registro auditável da baseline adotada. Consulte o guia de upgrades antes de
+# trocar tag ou commit: https://github.com/marcos-scalabrin/bp-best-practices
+bp:
+  repository: "git@github.com:marcos-scalabrin/bp-best-practices.git"
+  version: "v2.7.0"
+  commit: "125a1c459a8e30fefdf8151a167c870f8f3954ca"
+  adopted_at: "2026-08-06"
+
+profiles:
+  - service
+  - project-ops-plane
+
+verification:
+  command: "make check"
+  ci_workflow: ".github/workflows/ci.yml"
+
+task_server:
+  plane:
+    workspace: "tp_ai"
+    project: "INFRA"
+    project_id: "d2de83b4-2a28-4bb6-9cb8-4fdc34b1acce"
+    module: "MODELS"
+    module_id: "8ed4553a-80b6-4b41-bd28-63132772c7e5"
+  local_mirror: "BACKLOG.md"
+
+deviations: []

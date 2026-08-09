@@ -67,25 +67,29 @@ function CopyButton({ value }: { value: string }) {
   );
 }
 
-export function ModelDetail({
-  model,
-  profiles,
-  currentProfile,
-  onClose,
-  onCompare,
-  inCompare,
-}: {
+type ModelDetailProps = {
   model: ScoredModel | null;
   profiles: ProfileInfo[];
   currentProfile: string;
   onClose: () => void;
   onCompare: (id: string) => void;
   inCompare: boolean;
-}) {
-  const [showFullDesc, setShowFullDesc] = useState(false);
-  useEffect(() => setShowFullDesc(false), [model?.id]);
+};
 
-  if (!model) return null;
+export function ModelDetail(props: ModelDetailProps) {
+  if (!props.model) return null;
+  return <ModelDetailContent key={props.model.id} {...props} model={props.model} />;
+}
+
+function ModelDetailContent({
+  model,
+  profiles,
+  currentProfile,
+  onClose,
+  onCompare,
+  inCompare,
+}: Omit<ModelDetailProps, "model"> & { model: ScoredModel }) {
+  const [showFullDesc, setShowFullDesc] = useState(false);
   const e = model.evaluations;
   const p = model.pricing;
   const desc = model.description ?? "";

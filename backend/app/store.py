@@ -12,7 +12,7 @@ import httpx
 
 from .config import settings
 from .join import JoinResult, join
-from .schemas import MetaInfo, Model
+from .schemas import MetaInfo, Model, SourceInfo
 from .sources import artificial_analysis as aa
 from .sources import openrouter as orr
 
@@ -25,6 +25,14 @@ class ModelStore:
         self._join: JoinResult | None = None
         self._last_updated: float | None = None
         self._source_mode: str = "fixtures"
+        self._source_modes: dict[str, str] = {
+            "openrouter": "fixtures",
+            "artificial_analysis": "fixtures",
+        }
+        self._source_updated_at: dict[str, float | None] = {
+            "openrouter": None,
+            "artificial_analysis": None,
+        }
         self._aa_available: bool = False
         self._lock = asyncio.Lock()
 
@@ -36,17 +44,17 @@ class ModelStore:
     def _load_aa_fixture(self) -> list[dict]:
         return json.loads((_DATA_DIR / "aa_fixture.json").read_text())["data"]
 
-    async def _load_sources(self) -> tuple[list, list, str, bool]:
-        """Return (or_models, aa_models, source_mode, aa_available)."""
+    async def _load_sources(self) -> tuple[list, list, dict[str, str], bool]:
+        """Return parsed data, per-source modes, and AA live availability."""
         if settings.use_fixtures:
             return (
                 orr.parse(self._load_or_fixture()),
                 aa.parse(self._load_aa_fixture()),
-                "fixtures",
+                {"openrouter": "fixtures", "artificial_analysis": "fixtures"},
                 True,
             )
 
-        source_mode = "live"
+        source_modes = {"openrouter": "live", "artificial_analysis": "fixtures"}
         aa_available = False
         async with httpx.AsyncClient() as client:
             # OpenRouter (public)
@@ -55,7 +63,7 @@ class ModelStore:
                 or_models = orr.parse(or_raw)
             except Exception:
                 or_models = orr.parse(self._load_or_fixture())
-                source_mode = "fixtures"
+                source_modes["openrouter"] = "fixtures"
 
             # Artificial Analysis (needs key)
             aa_models: list = []
@@ -64,23 +72,28 @@ class ModelStore:
                     aa_raw = await aa.fetch_raw(client)
                     aa_models = aa.parse(aa_raw)
                     aa_available = True
+                    source_modes["artificial_analysis"] = "live"
                 except Exception:
                     aa_models = aa.parse(self._load_aa_fixture())
             else:
                 aa_models = aa.parse(self._load_aa_fixture())
 
-        return or_models, aa_models, source_mode, aa_available
+        return or_models, aa_models, source_modes, aa_available
 
     # --- public API --------------------------------------------------------
 
     async def refresh(self) -> None:
         async with self._lock:
-            or_models, aa_models, mode, aa_available = await self._load_sources()
+            or_models, aa_models, source_modes, aa_available = await self._load_sources()
             result = join(or_models, aa_models)
+            updated_at = time.time()
             self._join = result
             self._models = result.models
-            self._last_updated = time.time()
-            self._source_mode = mode
+            self._last_updated = updated_at
+            self._source_modes = source_modes
+            self._source_updated_at = {source: updated_at for source in source_modes}
+            modes = set(source_modes.values())
+            self._source_mode = "live" if modes == {"live"} else "fixtures" if modes == {"fixtures"} else "mixed"
             self._aa_available = aa_available
 
     def _is_stale(self) -> bool:
@@ -108,6 +121,18 @@ class ModelStore:
                 else None
             ),
             source_mode=self._source_mode,
+            sources={
+                source: SourceInfo(
+                    mode=mode,
+                    last_updated=(
+                        datetime.fromtimestamp(updated_at, tz=timezone.utc).isoformat()
+                        if updated_at
+                        else None
+                    ),
+                )
+                for source, mode in self._source_modes.items()
+                for updated_at in [self._source_updated_at.get(source)]
+            },
             aa_available=self._aa_available,
         )
 

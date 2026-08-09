@@ -20,7 +20,20 @@ export function Header({
   onRefresh: () => void;
   refreshing: boolean;
 }) {
-  const live = meta?.source_mode === "live";
+  const mode = meta?.source_mode ?? "fixtures";
+  const modeStyle = {
+    live: "bg-emerald-500/15 text-emerald-300",
+    mixed: "bg-sky-500/15 text-sky-300",
+    fixtures: "bg-amber-500/15 text-amber-300",
+  }[mode];
+  const dotStyle = {
+    live: "bg-emerald-400",
+    mixed: "bg-sky-400",
+    fixtures: "bg-amber-400",
+  }[mode];
+  const sourceSummary = meta
+    ? `OpenRouter: ${meta.sources.openrouter.mode}; Artificial Analysis: ${meta.sources.artificial_analysis.mode}`
+    : "";
 
   return (
     <header className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-border bg-surface/40 px-6 py-4 backdrop-blur">
@@ -69,10 +82,12 @@ export function Header({
         {meta && (
           <div className="hidden items-center gap-4 text-xs text-muted sm:flex">
             <span
-              className={`flex items-center gap-1.5 rounded-md px-2 py-1 ${live ? "bg-emerald-500/15 text-emerald-300" : "bg-amber-500/15 text-amber-300"}`}
+              className={`flex items-center gap-1.5 rounded-md px-2 py-1 ${modeStyle}`}
+              title={sourceSummary}
+              aria-label={`Fontes: ${sourceSummary}`}
             >
-              <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-emerald-400" : "bg-amber-400"}`} />
-              {live ? "live" : "fixtures"}
+              <span className={`h-1.5 w-1.5 rounded-full ${dotStyle}`} />
+              {mode}
             </span>
             <span>
               <b className="text-text">{meta.matched_models}</b>/{meta.total_models} matched

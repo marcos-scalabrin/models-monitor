@@ -86,6 +86,15 @@ export interface MetaInfo {
   openrouter_only: number;
   aa_only: number;
   last_updated: string | null;
-  source_mode: string;
+  source_mode: "live" | "fixtures" | "mixed";
+  sources: {
+    openrouter: SourceInfo;
+    artificial_analysis: SourceInfo;
+  };
   aa_available: boolean;
+}
+
+export interface SourceInfo {
+    mode: "live" | "fixtures";
+    last_updated: string | null;
 }

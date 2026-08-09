@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "./api";
 import type { MetaInfo, ProfileInfo, Recommendation, ScoredModel } from "./types";
 import { Header } from "./components/Header";
-import { FilterBar, DEFAULT_FILTERS, type Filters } from "./components/FilterBar";
+import { FilterBar } from "./components/FilterBar";
+import { DEFAULT_FILTERS, type Filters } from "./filters";
 import { CostPerformanceMap } from "./components/CostPerformanceMap";
 import { RecommendationPanel } from "./components/RecommendationPanel";
 import { ModelTable } from "./components/ModelTable";
@@ -47,7 +48,6 @@ export default function App() {
   // load scored models + recommendation whenever profile/alpha changes (debounced)
   const debounce = useRef<number | undefined>(undefined);
   useEffect(() => {
-    setLoading(true);
     window.clearTimeout(debounce.current);
     debounce.current = window.setTimeout(() => {
       Promise.all([api.models(profile, alpha), api.recommend(profile, alpha, 3)])
@@ -61,6 +61,20 @@ export default function App() {
     }, 180);
     return () => window.clearTimeout(debounce.current);
   }, [profile, alpha]);
+
+  function changeProfile(next: string) {
+    setLoading(true);
+    setProfile(next);
+  }
+
+  function changeAlpha(next: number) {
+    setLoading(true);
+    setAlpha(next);
+  }
+
+  function clearFilters() {
+    setFilters(DEFAULT_FILTERS);
+  }
 
   async function handleRefresh() {
     setRefreshing(true);
@@ -122,9 +136,9 @@ export default function App() {
       <Header
         profiles={profiles}
         profile={profile}
-        onProfile={setProfile}
+        onProfile={changeProfile}
         alpha={alpha}
-        onAlpha={setAlpha}
+        onAlpha={changeAlpha}
         meta={meta}
         onRefresh={handleRefresh}
         refreshing={refreshing}
@@ -180,6 +194,8 @@ export default function App() {
             selectedId={selected?.id}
             compareIds={compareIds}
             onToggleCompare={toggleCompare}
+            onClearFilters={clearFilters}
+            loadError={Boolean(error && models.length === 0)}
           />
         </div>
       </main>

@@ -4,54 +4,62 @@ import { fmtContext, fmtDate, fmtPct, fmtScore, fmtUSD } from "../lib";
 import { TierBadge } from "./TierBadge";
 
 type Dir = "max" | "min" | "bool" | "text";
+type AttrValue = number | string | boolean | null;
 
 interface Attr {
   label: string;
   hint?: string;
-  get: (m: ScoredModel) => number | string | boolean | null;
-  fmt?: (v: any) => string;
+  get: (m: ScoredModel) => AttrValue;
+  fmt?: (v: AttrValue) => string;
   dir: Dir;
   highlight?: boolean;  // accents the row label (e.g. for the current profile)
 }
+
+const asNumber = (value: AttrValue) => (typeof value === "number" ? value : null);
+const formatUSD = (value: AttrValue) => fmtUSD(asNumber(value));
+const formatScore = (value: AttrValue) => fmtScore(asNumber(value));
+const formatPct = (value: AttrValue) => fmtPct(asNumber(value));
+const formatContext = (value: AttrValue) => fmtContext(asNumber(value));
+const formatDate = (value: AttrValue) => fmtDate(typeof value === "string" ? value : null);
 
 const SECTIONS_BEFORE_PROFILE_COSTS: { title: string; rows: Attr[] }[] = [
   {
     title: "Resumo",
     rows: [
-      { label: "Tier", get: (m) => m.tier, dir: "text", fmt: (v) => v ?? "—" },
-      { label: "Value ratio (perfil)", get: (m) => m.value_ratio, fmt: (v) => v ?? "—", dir: "max" },
-      { label: "Benchmark (perfil)", get: (m) => m.benchmark_score, fmt: fmtScore, dir: "max" },
-      { label: "Custo/1M (perfil)", get: (m) => m.cost_for_profile, fmt: fmtUSD, dir: "min" },
+      { label: "Tier", get: (m) => m.tier, dir: "text", fmt: (v) => String(v ?? "—") },
+      { label: "Value ratio (perfil)", get: (m) => m.value_ratio, fmt: (v) => String(v ?? "—"), dir: "max" },
+      { label: "Benchmark (perfil)", get: (m) => m.benchmark_score, fmt: formatScore, dir: "max" },
+      { label: "Custo/1M (perfil)", get: (m) => m.cost_for_profile, fmt: formatUSD, dir: "min" },
     ],
   },
   {
     title: "Índices",
     rows: [
-      { label: "Intelligence", get: (m) => m.evaluations.intelligence, fmt: fmtScore, dir: "max" },
-      { label: "Coding", get: (m) => m.evaluations.coding, fmt: fmtScore, dir: "max" },
-      { label: "Math", get: (m) => m.evaluations.math, fmt: fmtScore, dir: "max" },
+      { label: "Intelligence", get: (m) => m.evaluations.intelligence, fmt: formatScore, dir: "max" },
+      { label: "Coding", get: (m) => m.evaluations.coding, fmt: formatScore, dir: "max" },
+      { label: "Math", get: (m) => m.evaluations.math, fmt: formatScore, dir: "max" },
     ],
   },
   {
     title: "Reasoning",
     rows: [
-      { label: "GPQA Diamond", get: (m) => m.evaluations.gpqa, fmt: fmtPct, dir: "max" },
-      { label: "Humanity's Last Exam", get: (m) => m.evaluations.hle, fmt: fmtPct, dir: "max" },
-      { label: "SciCode", get: (m) => m.evaluations.scicode, fmt: fmtPct, dir: "max" },
-      { label: "MMLU-Pro", get: (m) => m.evaluations.mmlu_pro, fmt: fmtPct, dir: "max" },
-      { label: "MATH-500", get: (m) => m.evaluations.math_500, fmt: fmtPct, dir: "max" },
-      { label: "AIME", get: (m) => m.evaluations.aime, fmt: fmtPct, dir: "max" },
-      { label: "AIME 2025", get: (m) => m.evaluations.aime_25, fmt: fmtPct, dir: "max" },
-      { label: "LCR (long-context)", get: (m) => m.evaluations.lcr, fmt: fmtPct, dir: "max" },
-      { label: "LiveCodeBench", get: (m) => m.evaluations.livecodebench, fmt: fmtPct, dir: "max" },
+      { label: "GPQA Diamond", get: (m) => m.evaluations.gpqa, fmt: formatPct, dir: "max" },
+      { label: "Humanity's Last Exam", get: (m) => m.evaluations.hle, fmt: formatPct, dir: "max" },
+      { label: "SciCode", get: (m) => m.evaluations.scicode, fmt: formatPct, dir: "max" },
+      { label: "MMLU-Pro", get: (m) => m.evaluations.mmlu_pro, fmt: formatPct, dir: "max" },
+      { label: "MATH-500", get: (m) => m.evaluations.math_500, fmt: formatPct, dir: "max" },
+      { label: "AIME", get: (m) => m.evaluations.aime, fmt: formatPct, dir: "max" },
+      { label: "AIME 2025", get: (m) => m.evaluations.aime_25, fmt: formatPct, dir: "max" },
+      { label: "LCR (long-context)", get: (m) => m.evaluations.lcr, fmt: formatPct, dir: "max" },
+      { label: "LiveCodeBench", get: (m) => m.evaluations.livecodebench, fmt: formatPct, dir: "max" },
     ],
   },
   {
     title: "Orquestração & Tool Use",
     rows: [
-      { label: "IFBench", get: (m) => m.evaluations.ifbench, fmt: fmtPct, dir: "max" },
-      { label: "τ-bench (Tau2)", get: (m) => m.evaluations.tau2, fmt: fmtPct, dir: "max" },
-      { label: "Terminal-Bench Hard", get: (m) => m.evaluations.terminalbench_hard, fmt: fmtPct, dir: "max" },
+      { label: "IFBench", get: (m) => m.evaluations.ifbench, fmt: formatPct, dir: "max" },
+      { label: "τ-bench (Tau2)", get: (m) => m.evaluations.tau2, fmt: formatPct, dir: "max" },
+      { label: "Terminal-Bench Hard", get: (m) => m.evaluations.terminalbench_hard, fmt: formatPct, dir: "max" },
       { label: "tools", get: (m) => m.supported_parameters.includes("tools"), dir: "bool" },
       { label: "tool_choice", get: (m) => m.supported_parameters.includes("tool_choice"), dir: "bool" },
       { label: "structured_outputs", get: (m) => m.supported_parameters.includes("structured_outputs"), dir: "bool" },
@@ -61,11 +69,11 @@ const SECTIONS_BEFORE_PROFILE_COSTS: { title: string; rows: Attr[] }[] = [
   {
     title: "Pricing",
     rows: [
-      { label: "Input $/1M", get: (m) => m.pricing.input_1m, fmt: fmtUSD, dir: "min" },
-      { label: "Output $/1M", get: (m) => m.pricing.output_1m, fmt: fmtUSD, dir: "min" },
-      { label: "Cache read $/1M", get: (m) => m.pricing.cache_read_1m, fmt: fmtUSD, dir: "min" },
-      { label: "Cache write $/1M", get: (m) => m.pricing.cache_write_1m, fmt: fmtUSD, dir: "min" },
-      { label: "Blended (3:1) $/1M", get: (m) => m.pricing.blended_1m, fmt: fmtUSD, dir: "min" },
+      { label: "Input $/1M", get: (m) => m.pricing.input_1m, fmt: formatUSD, dir: "min" },
+      { label: "Output $/1M", get: (m) => m.pricing.output_1m, fmt: formatUSD, dir: "min" },
+      { label: "Cache read $/1M", get: (m) => m.pricing.cache_read_1m, fmt: formatUSD, dir: "min" },
+      { label: "Cache write $/1M", get: (m) => m.pricing.cache_write_1m, fmt: formatUSD, dir: "min" },
+      { label: "Blended (3:1) $/1M", get: (m) => m.pricing.blended_1m, fmt: formatUSD, dir: "min" },
     ],
   },
 ];
@@ -74,32 +82,32 @@ const SECTIONS_AFTER_PROFILE_COSTS: { title: string; rows: Attr[] }[] = [
   {
     title: "Capacidades",
     rows: [
-      { label: "Context window", get: (m) => m.context_length, fmt: fmtContext, dir: "max" },
-      { label: "Max output", get: (m) => m.max_output_tokens, fmt: fmtContext, dir: "max" },
-      { label: "Modalidade", get: (m) => m.modality, dir: "text", fmt: (v) => v ?? "—" },
-      { label: "Input modalities", get: (m) => m.input_modalities.join(", "), dir: "text", fmt: (v) => v || "—" },
-      { label: "Tokenizer", get: (m) => m.tokenizer, dir: "text", fmt: (v) => v ?? "—" },
+      { label: "Context window", get: (m) => m.context_length, fmt: formatContext, dir: "max" },
+      { label: "Max output", get: (m) => m.max_output_tokens, fmt: formatContext, dir: "max" },
+      { label: "Modalidade", get: (m) => m.modality, dir: "text", fmt: (v) => String(v ?? "—") },
+      { label: "Input modalities", get: (m) => m.input_modalities.join(", "), dir: "text", fmt: (v) => String(v || "—") },
+      { label: "Tokenizer", get: (m) => m.tokenizer, dir: "text", fmt: (v) => String(v ?? "—") },
     ],
   },
   {
     title: "Performance",
     rows: [
-      { label: "Throughput (t/s)", get: (m) => m.performance.output_tokens_per_second, fmt: (v) => (v == null ? "—" : v.toFixed(0)), dir: "max" },
-      { label: "TTFT (s)", get: (m) => m.performance.time_to_first_token_s, fmt: (v) => (v == null ? "—" : v.toFixed(1)), dir: "min" },
-      { label: "TTFA pós-thinking (s)", get: (m) => m.performance.time_to_first_answer_s, fmt: (v) => (v == null ? "—" : v.toFixed(1)), dir: "min" },
+      { label: "Throughput (t/s)", get: (m) => m.performance.output_tokens_per_second, fmt: (v) => (typeof v === "number" ? v.toFixed(0) : "—"), dir: "max" },
+      { label: "TTFT (s)", get: (m) => m.performance.time_to_first_token_s, fmt: (v) => (typeof v === "number" ? v.toFixed(1) : "—"), dir: "min" },
+      { label: "TTFA pós-thinking (s)", get: (m) => m.performance.time_to_first_answer_s, fmt: (v) => (typeof v === "number" ? v.toFixed(1) : "—"), dir: "min" },
     ],
   },
   {
     title: "Datas",
     rows: [
-      { label: "Release", get: (m) => m.release_date, dir: "text", fmt: fmtDate },
-      { label: "Adicionado OR", get: (m) => m.added_at, dir: "text", fmt: fmtDate },
-      { label: "Knowledge cutoff", get: (m) => m.knowledge_cutoff, dir: "text", fmt: fmtDate },
+      { label: "Release", get: (m) => m.release_date, dir: "text", fmt: formatDate },
+      { label: "Adicionado OR", get: (m) => m.added_at, dir: "text", fmt: formatDate },
+      { label: "Knowledge cutoff", get: (m) => m.knowledge_cutoff, dir: "text", fmt: formatDate },
     ],
   },
 ];
 
-function isBestValue(value: any, attr: Attr, all: any[]): boolean {
+function isBestValue(value: AttrValue, attr: Attr, all: AttrValue[]): boolean {
   if (attr.dir === "text") return false;
   if (attr.dir === "bool") return value === true;
   const nums = all.filter((v) => typeof v === "number") as number[];
@@ -108,7 +116,7 @@ function isBestValue(value: any, attr: Attr, all: any[]): boolean {
   return value === best && nums.length > 1;
 }
 
-function Cell({ raw, attr, all }: { raw: any; attr: Attr; all: any[] }) {
+function Cell({ raw, attr, all }: { raw: AttrValue; attr: Attr; all: AttrValue[] }) {
   const best = isBestValue(raw, attr, all);
   const formatted =
     attr.dir === "bool"
@@ -149,7 +157,7 @@ export function Compare({
       label: pf.label,
       hint: `${pf.cost_pattern} — ${pf.description}`,
       get: (m) => m.costs_by_profile?.[pf.key] ?? null,
-      fmt: fmtUSD,
+      fmt: formatUSD,
       dir: "min" as Dir,
       highlight: pf.key === currentProfile,
     }));

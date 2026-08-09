@@ -98,11 +98,18 @@ npm run dev                   # http://localhost:5173 (proxy /api -> :8890)
 | `GET` | `/api/tiers?profile=…` | Modelos agrupados por tier |
 | `GET` | `/api/cost-map?profile=…` | Pontos prontos para plotar (benchmark + custo) |
 | `GET` | `/api/profiles` | Perfis de agente disponíveis |
-| `GET` | `/api/meta` | Status: total/matched, modo (live/fixtures), última atualização |
+| `GET` | `/api/meta` | Status, modo agregado (`live`/`fixtures`/`mixed`) e proveniência por fonte |
 | `POST` | `/api/refresh` | Força re-fetch das fontes |
 
 Parâmetros comuns: `profile` (perfil de agente), `alpha` (sensibilidade ao
 custo: `0` ignora custo, `0.5` raiz quadrada (default), `1` linear).
+
+`/api/meta` e a resposta de `/api/refresh` expõem `sources.openrouter` e
+`sources.artificial_analysis`, cada qual com `mode` (`live` ou `fixtures`) e
+`last_updated` (hora em que a fonte foi carregada no cache local, não a data do
+dado no provedor). O `source_mode` agregado é `mixed` quando as duas fontes não
+têm a mesma origem; consumidores não devem tratar esse estado como dados live
+integrais.
 
 Em `/recommend`, há um piso de capacidade `min_intelligence` (default **48**):
 todos os modelos retornados — primário e fallbacks — precisam ter Intelligence
@@ -142,11 +149,15 @@ sem benchmark ou fora dos thresholds (`MAX_INPUT_COST_PER_1M`,
 ## Testes
 
 ```bash
-cd backend && uv run pytest
+# Na primeira execução ou após alterar o lockfile:
+cd frontend && npm ci && cd ..
+make check
 ```
 
-Cobrem o join (matching, aliases de creator, dedup de variantes, modelos
-não-matched) e o scoring (value_ratio, atribuição de tiers, efeito de α).
+É o mesmo gate do CI: scan de segredos em arquivos comittable, testes de
+backend em fixtures offline, lint e build do frontend. A estratégia e os
+limites de teste estão no [TestPlan](docs/testplans/testplan-service.md); o
+procedimento para rodar localmente está no [RunGuide](docs/runguides/local-development.md).
 
 ## Roadmap
 

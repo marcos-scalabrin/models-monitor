@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, type WheelEvent } from "react";
 import {
   CartesianGrid,
   ResponsiveContainer,
@@ -19,7 +19,48 @@ interface Point {
   model: ScoredModel;
 }
 
-function CustomTooltip({ active, payload }: any) {
+type Domain = [number, number];
+
+interface Viewport {
+  x: Domain;
+  y: Domain;
+  boundsKey: string;
+}
+
+const ZOOM_FACTOR = 1.6;
+
+function ticksFor([lo, hi]: Domain): number[] {
+  const step = (hi - lo) / 5;
+  return Array.from({ length: 6 }, (_, index) => lo + step * index);
+}
+
+function zoomDomain(current: Domain, bounds: Domain, factor: number): Domain {
+  const [currentLo, currentHi] = current;
+  const [boundLo, boundHi] = bounds;
+  const boundSpan = boundHi - boundLo;
+  const targetSpan = Math.min(boundSpan, Math.max(boundSpan / 64, (currentHi - currentLo) / factor));
+  const center = (currentLo + currentHi) / 2;
+  let lo = center - targetSpan / 2;
+  let hi = center + targetSpan / 2;
+
+  if (lo < boundLo) {
+    hi += boundLo - lo;
+    lo = boundLo;
+  }
+  if (hi > boundHi) {
+    lo -= hi - boundHi;
+    hi = boundHi;
+  }
+  return [lo, hi];
+}
+
+function CustomTooltip({
+  active,
+  payload,
+}: {
+  active?: boolean;
+  payload?: { payload: Point }[];
+}) {
   if (!active || !payload?.length) return null;
   const p: Point = payload[0].payload;
   const m = p.model;
@@ -55,7 +96,7 @@ export function CostPerformanceMap({
 }) {
   // We transform cost to log10 ourselves and use a linear axis — Recharts'
   // built-in scale="log" mispositions scatter points (renders axis, drops dots).
-  const { byTier, xDomain, xTicks } = useMemo(() => {
+  const { byTier, xDomain, yDomain } = useMemo(() => {
     const groups: Record<Tier, Point[]> = { S: [], A: [], B: [], C: [], F: [] };
     let min = Infinity;
     let max = -Infinity;
@@ -75,29 +116,95 @@ export function CostPerformanceMap({
     }
     const lo = Number.isFinite(min) ? Math.floor(min * 2) / 2 - 0.1 : -1;
     const hi = Number.isFinite(max) ? Math.ceil(max * 2) / 2 + 0.1 : 2;
-    const ticks: number[] = [];
-    const step = (hi - lo) / 5;
-    for (let i = 0; i <= 5; i++) ticks.push(lo + step * i);
-    return { byTier: groups, xDomain: [lo, hi] as [number, number], xTicks: ticks };
+    return {
+      byTier: groups,
+      xDomain: [lo, hi] as Domain,
+      yDomain: [0, 100] as Domain,
+    };
   }, [models]);
+
+  const [viewport, setViewport] = useState<Viewport | null>(null);
+  const boundsKey = `${xDomain[0]}:${xDomain[1]}:${yDomain[0]}:${yDomain[1]}`;
+  // A viewport belongs to a particular dataset/filter range. Treat an old one
+  // as reset instead of setting state from an effect when the data changes.
+  const activeViewport = viewport?.boundsKey === boundsKey ? viewport : null;
+
+  const visible = activeViewport ?? { x: xDomain, y: yDomain };
+  const zoomed = activeViewport !== null;
+
+  function zoom(factor: number) {
+    setViewport((current) => {
+      const active = current?.boundsKey === boundsKey ? current : { x: xDomain, y: yDomain };
+      const next = {
+        x: zoomDomain(active.x, xDomain, factor),
+        y: zoomDomain(active.y, yDomain, factor),
+      };
+      if (next.x[0] === xDomain[0] && next.x[1] === xDomain[1] && next.y[0] === yDomain[0] && next.y[1] === yDomain[1]) {
+        return null;
+      }
+      return { ...next, boundsKey };
+    });
+  }
+
+  function handleWheel(event: WheelEvent<HTMLDivElement>) {
+    // Trackpad pinch is reported as ctrl+wheel by browsers; requiring a
+    // modifier also keeps ordinary page scrolling intact.
+    if (!event.ctrlKey && !event.metaKey) return;
+    event.preventDefault();
+    zoom(event.deltaY < 0 ? ZOOM_FACTOR : 1 / ZOOM_FACTOR);
+  }
 
   return (
     <section className="flex h-full flex-col rounded-2xl border border-border bg-surface/70 p-5 backdrop-blur">
-      <div className="mb-3 flex items-baseline justify-between">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-muted">
           Mapa custo × performance
         </h2>
-        <div className="flex flex-wrap gap-3 text-xs">
+        <div className="flex flex-wrap items-center gap-3 text-xs">
           {TIER_ORDER.filter((t) => t !== "F").map((t) => (
             <span key={t} className="flex items-center gap-1.5 text-muted">
               <span className="h-2.5 w-2.5 rounded-full" style={{ background: TIER_COLORS[t] }} />
               {t} · {TIER_LABELS[t]}
             </span>
           ))}
+          <div className="flex items-center gap-1 rounded-lg border border-border bg-surface-2 p-1" aria-label="Controles de zoom do mapa">
+            <button
+              type="button"
+              onClick={() => zoom(ZOOM_FACTOR)}
+              className="rounded px-2 py-1 font-semibold text-text transition hover:bg-surface hover:text-accent-soft"
+              aria-label="Ampliar mapa"
+              title="Ampliar"
+            >
+              +
+            </button>
+            <button
+              type="button"
+              onClick={() => zoom(1 / ZOOM_FACTOR)}
+              className="rounded px-2 py-1 font-semibold text-text transition hover:bg-surface hover:text-accent-soft"
+              aria-label="Reduzir mapa"
+              title="Reduzir"
+            >
+              −
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewport(null)}
+              disabled={!zoomed}
+              className="rounded px-2 py-1 text-muted transition hover:bg-surface hover:text-text disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Restaurar visão completa do mapa"
+              title="Restaurar visão completa"
+            >
+              Reset
+            </button>
+          </div>
         </div>
       </div>
 
-      <div className="min-h-0 flex-1">
+      <div
+        className="min-h-0 flex-1"
+        onWheel={handleWheel}
+        aria-label="Mapa interativo. Use os controles ou Ctrl mais roda do mouse para aplicar zoom."
+      >
         <ResponsiveContainer width="100%" height="100%">
           <ScatterChart margin={{ top: 10, right: 20, bottom: 40, left: 10 }}>
             <CartesianGrid stroke="var(--color-border)" strokeDasharray="3 3" opacity={0.5} />
@@ -105,8 +212,8 @@ export function CostPerformanceMap({
               type="number"
               dataKey="x"
               name="Custo"
-              domain={xDomain}
-              ticks={xTicks}
+              domain={visible.x}
+              ticks={ticksFor(visible.x)}
               allowDataOverflow
               tick={{ fill: "var(--color-muted)", fontSize: 11 }}
               tickFormatter={(v) => fmtUSD(10 ** v)}
@@ -122,7 +229,7 @@ export function CostPerformanceMap({
               type="number"
               dataKey="y"
               name="Benchmark"
-              domain={[0, 100]}
+              domain={visible.y}
               tick={{ fill: "var(--color-muted)", fontSize: 11 }}
               label={{
                 value: benchmarkLabel,
@@ -144,7 +251,10 @@ export function CostPerformanceMap({
                 stroke={TIER_COLORS[tier]}
                 strokeOpacity={0.9}
                 isAnimationActive={false}
-                onClick={(d: any) => d?.model && onSelect(d.model)}
+                onClick={(point: unknown) => {
+                  const model = (point as { model?: ScoredModel } | undefined)?.model;
+                  if (model) onSelect(model);
+                }}
                 className="cursor-pointer"
               />
             ))}
