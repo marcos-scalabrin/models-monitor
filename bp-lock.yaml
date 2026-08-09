@@ -2,9 +2,9 @@
 # trocar tag ou commit: https://github.com/marcos-scalabrin/bp-best-practices
 bp:
   repository: "git@github.com:marcos-scalabrin/bp-best-practices.git"
-  version: "v2.7.0"
-  commit: "125a1c459a8e30fefdf8151a167c870f8f3954ca"
-  adopted_at: "2026-08-06"
+  version: "v2.13.0"
+  commit: "9e2ba10ec8002e9c6ad1ee96d61ae8dba99377de"
+  adopted_at: "2026-08-09"
 
 profiles:
   - service
@@ -23,4 +23,15 @@ task_server:
     module_id: "8ed4553a-80b6-4b41-bd28-63132772c7e5"
   local_mirror: "BACKLOG.md"
 
-deviations: []
+deviations:
+  - bp_rule: "core.md §7.3 (dado de versão única)"
+    rationale: >-
+      A planilha local ignorada models-data_2026-05-26.xlsx é anterior ao
+      controle, não é lida pelo produto e sua origem, dono e reprodutibilidade
+      não podem ser inferidos sem abrir ou copiar seu conteúdo.
+    compensating_control: >-
+      O arquivo é tratado como potencialmente sensível, não é enviado por
+      automação e está rastreado no item MODELS-12 até classificação e prova de
+      retenção ou regeneração.
+    adr: "docs/adrs/adr-2026-08-09_legacy-xlsx-retention.md"
+    review_by: "2026-09-09"

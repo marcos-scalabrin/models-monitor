@@ -3,8 +3,8 @@
 | Campo | Valor |
 |---|---|
 | Created | 2026-08-06 |
-| Last review | 2026-08-06 |
-| Version | 1.0 |
+| Last review | 2026-08-09 |
+| Version | 1.1 |
 | Status | Active |
 
 ## Finalidade e pré-requisitos
@@ -39,3 +39,17 @@ Analysis/OpenRouter e podem consumir quota/créditos. Exigem aprovação explíc
 e uma `AA_API_KEY` apenas no ambiente local. Se uma execução local falhar ou
 ficar presa, use `./service.sh logs [backend|frontend]` para coletar evidência
 sem imprimir segredos e `./service.sh stop` para conter os processos.
+
+## Estado durável e dados locais ignorados
+
+O store de modelos é somente em memória; não há banco, migrations, cache de
+dados persistente ou backup operacional a restaurar. As fixtures do backend são
+sintéticas e versionadas. Portanto, `make check` usa estado descartável por
+default e não lê `backend/.env` nem chama provedores.
+
+Os diretórios ignorados de dependências, caches e `.run/` são regeneráveis. A
+exceção é `models-data_2026-05-26.xlsx`, planilha local ignorada não lida pelo
+produto. Ela é tratada como dado potencialmente sensível de versão única até
+classificação; não copie, envie ou use o arquivo em automação. Consulte a
+[ADR de retenção](../adrs/adr-2026-08-09_legacy-xlsx-retention.md) e MODELS-12
+antes de qualquer operação sobre ela.

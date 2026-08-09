@@ -16,7 +16,8 @@ dist/
 .DS_Store
 *.log
 
-# Local data exports
+# Local data exports. A planilha legada existente é potencialmente dado de
+# versão única; classificação e retenção: docs/adrs/adr-2026-08-09_legacy-xlsx-retention.md.
 *.xlsx
 
 # service.sh runtime (PIDs + logs)
