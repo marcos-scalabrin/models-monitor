@@ -22,3 +22,6 @@ dist/
 
 # service.sh runtime (PIDs + logs)
 .run/
+
+# Local input materials
+in/
